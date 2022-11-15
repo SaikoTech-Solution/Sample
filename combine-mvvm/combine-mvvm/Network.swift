@@ -19,12 +19,14 @@ class NetworkService: NetworkServiceType {
         var fieldString = String()
         
         for field in fields { fieldString += "&fields=\(field.rawValue)" }
+        
+        let encodedFilter = getFilterData(filter)
                 
-        let url = URL(string: "https://api.qloga.com/p4p/cst/providers?page=\(number)&psize=\(size)\(fieldString)&filter=%7B%22proximity%22%3A200%7D")
+        let url = URL(string: "https://api.qloga.com/p4p/cst/providers?page=\(number)&psize=\(size)\(fieldString)&filter=\(encodedFilter)")
         
         var request = URLRequest(url: url!,timeoutInterval: Double.infinity)
         
-        request.addValue("Bearer eyJraWQiOiI2bW5PVmt2OUVXdEM5bkVLWE1lNUpZNU5HSDMzeGsxUTQwVkw5LVdadVZJIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULldQVHljcGhBakNiTW1Wb3paSm5TVGFGVGdENzU1dVNQX1ZHOE00cjNseU0iLCJpc3MiOiJodHRwczovL2lkLnFsb2dhLmNvbS9vYXV0aDIvYXVzMTRsbTR6N3BJamVmOTYzNTciLCJhdWQiOiJhcGk6Ly9hcGkucWxvZ2EuY29tIiwiaWF0IjoxNjY4NTA5NzAzLCJleHAiOjE2Njg1MTMzMDMsImNpZCI6IjBvYTJvYWtvOHBaVzNHdVVsMzU3IiwidWlkIjoiMDB1NW52ZGE4YnVHQWN3WGczNTciLCJzY3AiOlsib3BlbmlkIl0sImF1dGhfdGltZSI6MTY2ODUwOTcwMSwic3ViIjoiMTAwMkBxbG9nYS5jb20iLCJxZmlkIjoxMDAwLCJjYWxJZCI6MTAwMiwiZmNhbElkIjoxMDAwLCJxcGlkIjoxMDAyfQ.jV3mo7cwjK43SYb_UzwCA8igqSBhQLmN4HUfzZw-xkgJYqzMhlCgDd8oDYpldqcw4ImSncAEC_PcZfmepELJ6_bBsAo6NXc858wVrOFpc3zECJPjr_LafYh_r_GjxDvDEKn0eHKp8Gq1ImN6UWqBP1KuAnqqQgQu2xNLbGXIYXux5ljdH0Nk1LQ85e8t-C3zaH2QXVWUhLHHuob6EtmMPv6uGYZb6_Y1876apKVf4i-PHHblL9rhF1KtYjZX2RLrmnU5ECfWZgItzZQQOebxvko79BPph0-3MdJ_HizODkjzwDULs2tGeossLulxL56cPS47wHjkjEDVQN7mPYLyeA", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer eyJraWQiOiI2bW5PVmt2OUVXdEM5bkVLWE1lNUpZNU5HSDMzeGsxUTQwVkw5LVdadVZJIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULm5OQ2tsUnYtZjdrTFU5SlpTMFB1aDdCU2JVSFVFRXlnMHhQanVac2NzOUEiLCJpc3MiOiJodHRwczovL2lkLnFsb2dhLmNvbS9vYXV0aDIvYXVzMTRsbTR6N3BJamVmOTYzNTciLCJhdWQiOiJhcGk6Ly9hcGkucWxvZ2EuY29tIiwiaWF0IjoxNjY4NTQzNDk4LCJleHAiOjE2Njg1NDcwOTgsImNpZCI6IjBvYTJvYWtvOHBaVzNHdVVsMzU3IiwidWlkIjoiMDB1NW52ZGE4YnVHQWN3WGczNTciLCJzY3AiOlsib3BlbmlkIl0sImF1dGhfdGltZSI6MTY2ODU0MzQ5Nywic3ViIjoiMTAwMkBxbG9nYS5jb20iLCJxZmlkIjoxMDAwLCJjYWxJZCI6MTAwMiwiZmNhbElkIjoxMDAwLCJxcGlkIjoxMDAyfQ.TlP4D-kA5lGv9L49BOjVlSp7sd4NdFlM7-lA8wVRkGvN604f4i3lsODlIF7Po7V8l2NObVZ_rx5H_d_0-Nn3Z-H4uPSBsnEYkUrJToh0iqWoP_UFp41axxmUS_TygEZad_nYYo6cNyQN4_tJDMqha_nFrK-XEGw09RBUmDCHaWhzAfytthW4ir7RL1QwMRtPhOE7sL6RWe6N-ax4pYw9dXHnUsDHhPeeSNcwHVfItVUj1faFWwnVBgfOKSK7r2MSjTMtupIM0TLIRD3-csNV47ihfhWM_IbfcY6EA6ud3fx2gj3OZG0GTgIdYclRnpLjyqW-27sUl2-CMB-x8x8GAQ", forHTTPHeaderField: "Authorization")
         
         return URLSession.shared.dataTaskPublisher(for: request)
             .catch { error in
@@ -33,5 +35,13 @@ class NetworkService: NetworkServiceType {
             .map({ $0.data })
             .decode(type: QPage.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()
+    }
+    
+    private func getFilterData(_ filter: PrvSearchFilter?) -> String {
+        let jsonEncoder = JSONEncoder()
+        guard let jsonData = try? jsonEncoder.encode(filter) else { return ""}
+        let json = String(data: jsonData, encoding: String.Encoding.utf8)
+        let encodedData = json?.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? ""
+        return encodedData
     }
 }
