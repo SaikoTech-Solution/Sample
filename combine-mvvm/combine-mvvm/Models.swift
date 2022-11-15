@@ -764,6 +764,7 @@ struct Address: Codable {
 enum Parking: String, Codable {
     case free = "FREE"
     case paid = "PAID"
+    case unset = "UNSET"
 }
 
 // MARK: - Verification

@@ -39,7 +39,7 @@ class ViewModel {
     
     private func handleAPIResponse() {
         output.send(.toggleButton(isEnabled: false))
-        networkServiceType.getProvidersSearch(number: 1, size: 1, filter: PrvSearchFilter(), fields: [PrvFields.id, PrvFields.org]).sink { [weak self] completion in
+        networkServiceType.getProvidersSearch(number: 1, size: 10, filter: PrvSearchFilter(), fields: [PrvFields.id, PrvFields.org]).sink { [weak self] completion in
             self?.output.send(.toggleButton(isEnabled: true))
             if case .failure(let error) = completion {
                 self?.output.send(.fetchAPIDidFail(error: error))
